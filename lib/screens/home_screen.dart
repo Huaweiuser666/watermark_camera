@@ -17,7 +17,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _checkPermissions() async {
     await Permission.camera.request();
     await Permission.storage.request();
-    await Permission.location.request();
   }
 
   @override
@@ -53,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               const SizedBox(height: 60),
-              // 应用图标
               Container(
                 width: 120,
                 height: 120,
@@ -75,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 30),
-              // 应用名称
               const Text(
                 '水印相机',
                 style: TextStyle(
@@ -93,12 +90,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const Spacer(),
-              // 功能按钮
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Column(
                   children: [
-                    // 拍照按钮
                     _buildButton(
                       icon: Icons.camera_alt,
                       label: '拍照',
@@ -112,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    // 相册选择按钮
                     _buildButton(
                       icon: Icons.photo_library,
                       label: '从相册选择',
