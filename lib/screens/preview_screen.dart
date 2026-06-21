@@ -1,9 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import '../utils/image_utils.dart';
 
 class PreviewScreen extends StatefulWidget {
@@ -27,36 +26,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
   String? _processedImagePath;
 
   final TextEditingController _customController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _getLocation();
-  }
-
-  Future<void> _getLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        setState(() => _locationText = '位置权限未开启');
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-      setState(() {
-        _locationText =
-            '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
-      });
-    } catch (e) {
-      setState(() => _locationText = '定位中...');
-    }
   }
 
   Future<void> _processImage() async {
@@ -137,15 +111,12 @@ class _PreviewScreenState extends State<PreviewScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 图片预览
           Positioned.fill(
             child: Image.file(
               File(_processedImagePath ?? widget.imagePath),
               fit: BoxFit.cover,
             ),
           ),
-
-          // 顶部操作栏
           Positioned(
             top: 0,
             left: 0,
@@ -167,12 +138,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // 返回按钮
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () => Navigator.pop(context),
                       ),
-                      // 右侧操作
                       Row(
                         children: [
                           IconButton(
@@ -191,8 +160,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
               ),
             ),
           ),
-
-          // 底部设置面板
           Positioned(
             bottom: 0,
             left: 0,
@@ -209,7 +176,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 面板标题
                     const Row(
                       children: [
                         Icon(Icons.tune, color: Colors.white70, size: 20),
@@ -225,9 +191,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-
-                    // 水印内容开关
-                    _buildSettingRow(
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _buildToggleChip(
                           icon: Icons.access_time,
@@ -261,8 +226,32 @@ class _PreviewScreenState extends State<PreviewScreen> {
                         ),
                       ],
                     ),
-
-                    // 自定义文字输入
+                    if (_showLocation) ...[
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _locationController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: '输入位置（如：商洛市·杨峪河派出所）',
+                          hintStyle: TextStyle(color: Colors.grey[500]),
+                          prefixIcon: const Icon(Icons.location_on,
+                              color: Colors.white54),
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.1),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setState(() => _locationText = value);
+                        },
+                      ),
+                    ],
                     if (_showCustom) ...[
                       const SizedBox(height: 12),
                       TextField(
@@ -289,13 +278,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
                         },
                       ),
                     ],
-
                     const SizedBox(height: 20),
-
-                    // 操作按钮行
                     Row(
                       children: [
-                        // 重新拍照
                         Expanded(
                           child: SizedBox(
                             height: 48,
@@ -314,7 +299,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // 生成水印
                         Expanded(
                           flex: 2,
                           child: SizedBox(
@@ -323,91 +307,3 @@ class _PreviewScreenState extends State<PreviewScreen> {
                               onPressed:
                                   _isProcessing ? null : _processImage,
                               icon: _isProcessing
-                                  ? const SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Icon(Icons.check_circle),
-                              label: Text(
-                                _isProcessing ? '处理中...' : '生成水印',
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingRow({required List<Widget> children}) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: children,
-    );
-  }
-
-  Widget _buildToggleChip({
-    required IconData icon,
-    required String label,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected
-              ? Colors.blue.withOpacity(0.3)
-              : Colors.white.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? Colors.blue : Colors.white24,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon,
-                size: 16,
-                color: selected ? Colors.blue : Colors.white54),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: selected ? Colors.white : Colors.white60,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _customController.dispose();
-    super.dispose();
-  }
-}
