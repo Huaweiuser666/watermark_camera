@@ -28,11 +28,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
   final TextEditingController _customController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Future<void> _processImage() async {
     setState(() => _isProcessing = true);
 
@@ -78,8 +73,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
         await picturesDir.create(recursive: true);
       }
 
-      final fileName =
-          'watermark_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final fileName = 'watermark_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final savedPath = '${picturesDir.path}/$fileName';
 
       await File(_processedImagePath!).copy(savedPath);
@@ -171,139 +165,205 @@ class _PreviewScreenState extends State<PreviewScreen> {
                   top: Radius.circular(20),
                 ),
               ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.tune, color: Colors.white70, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          '水印设置',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.tune, color: Colors.white70, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            '水印设置',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          _buildToggleChip(
+                            icon: Icons.access_time,
+                            label: '时间',
+                            selected: _showTime,
+                            onTap: () => setState(() => _showTime = !_showTime),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildToggleChip(
+                            icon: Icons.location_on,
+                            label: '位置',
+                            selected: _showLocation,
+                            onTap: () => setState(() => _showLocation = !_showLocation),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildToggleChip(
+                            icon: Icons.edit,
+                            label: '备注',
+                            selected: _showCustom,
+                            onTap: () => setState(() => _showCustom = !_showCustom),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildToggleChip(
+                            icon: Icons.verified,
+                            label: '品牌',
+                            selected: _showBrand,
+                            onTap: () => setState(() => _showBrand = !_showBrand),
+                          ),
+                        ],
+                      ),
+                      if (_showLocation) ...[
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _locationController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: '输入位置（如：商洛市·杨峪河派出所）',
+                            hintStyle: TextStyle(color: Colors.grey[500]),
+                            prefixIcon: const Icon(Icons.location_on, color: Colors.white54),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() => _locationText = value);
+                          },
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        _buildToggleChip(
-                          icon: Icons.access_time,
-                          label: '时间',
-                          selected: _showTime,
-                          onTap: () => setState(() => _showTime = !_showTime),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildToggleChip(
-                          icon: Icons.location_on,
-                          label: '位置',
-                          selected: _showLocation,
-                          onTap: () =>
-                              setState(() => _showLocation = !_showLocation),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildToggleChip(
-                          icon: Icons.edit,
-                          label: '备注',
-                          selected: _showCustom,
-                          onTap: () =>
-                              setState(() => _showCustom = !_showCustom),
-                        ),
-                        const SizedBox(width: 8),
-                        _buildToggleChip(
-                          icon: Icons.verified,
-                          label: '品牌',
-                          selected: _showBrand,
-                          onTap: () =>
-                              setState(() => _showBrand = !_showBrand),
+                      if (_showCustom) ...[
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _customController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: '输入备注信息',
+                            hintStyle: TextStyle(color: Colors.grey[500]),
+                            prefixIcon: const Icon(Icons.edit_note, color: Colors.white54),
+                            filled: true,
+                            fillColor: Colors.white.withOpacity(0.1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() => _customText = value);
+                          },
                         ),
                       ],
-                    ),
-                    if (_showLocation) ...[
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _locationController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: '输入位置（如：商洛市·杨峪河派出所）',
-                          hintStyle: TextStyle(color: Colors.grey[500]),
-                          prefixIcon: const Icon(Icons.location_on,
-                              color: Colors.white54),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          setState(() => _locationText = value);
-                        },
-                      ),
-                    ],
-                    if (_showCustom) ...[
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _customController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: '输入备注信息（如：工作检查、现场记录等）',
-                          hintStyle: TextStyle(color: Colors.grey[500]),
-                          prefixIcon: const Icon(Icons.edit_note,
-                              color: Colors.white54),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                        onChanged: (value) {
-                          setState(() => _customText = value);
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 48,
-                            child: OutlinedButton.icon(
-                              onPressed: () => Navigator.pop(context),
-                              icon: const Icon(Icons.camera_alt),
-                              label: const Text('重拍'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.white70,
-                                side: BorderSide(color: Colors.white24),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: OutlinedButton.icon(
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(Icons.camera_alt),
+                                label: const Text('重拍'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white70,
+                                  side: BorderSide(color: Colors.white24),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: SizedBox(
-                            height: 48,
-                            child: ElevatedButton.icon(
-                              onPressed:
-                                  _isProcessing ? null : _processImage,
-                              icon: _isProcessing
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: SizedBox(
+                              height: 48,
+                              child: ElevatedButton.icon(
+                                onPressed: _isProcessing ? null : _processImage,
+                                icon: _isProcessing
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.check_circle),
+                                label: Text(_isProcessing ? '处理中...' : '生成水印'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleChip({
+    required IconData icon,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? Colors.blue.withOpacity(0.3)
+              : Colors.white.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? Colors.blue : Colors.white24,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: selected ? Colors.blue : Colors.white54),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? Colors.white : Colors.white60,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _customController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
+}
